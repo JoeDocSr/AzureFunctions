@@ -19,8 +19,7 @@ namespace FuntioncAppWithEFCore
 {
     public class StartUp : FunctionsStartup
     {
-        private EvitiContext _evitiContext;
-        private EmpowerContext _empowerContext;
+       
         public override void Configure(IFunctionsHostBuilder builder)
         {
             var configuration = BuildConfiguration(builder.GetContext().ApplicationRootPath);

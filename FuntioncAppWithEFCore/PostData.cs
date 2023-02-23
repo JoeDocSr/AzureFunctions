@@ -10,33 +10,19 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using System.Text.Json.Serialization;
 using System.Configuration;
- 
+using Microsoft.Extensions.Logging;
+
 namespace EmpowerEligiblePatients
 {
     public class PostData
     {
 
-        public void PostToClient(ProxyEligiblePatients eligiblePatients)
+        public void PostToClient(ProxyEligiblePatients eligiblePatients, ILogger log)
         {
             var jsonObj = JsonSerializer.Serialize(eligiblePatients);
 
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri("https://localhost:44328/api/");
-            //    //HTTP GET
-            //    var responseTask = client.GetAsync("EligiblePatients");
-            //    responseTask.Wait();
-
-            //    var result = responseTask.Result;
-            //    if (result.IsSuccessStatusCode)
-            //    {
-
-
-            //    }
-            //}
-
-            Console.WriteLine("**** PREPARING TO SEND THESE PATIENTS TO CLIENT ****");
-           Console.WriteLine(jsonObj.ToString());
+            log.LogInformation("**** PREPARING TO SEND THESE PATIENTS TO CLIENT ****");
+            log.LogInformation(jsonObj.ToString());
 
             using (var client = new HttpClient())
             {
@@ -46,39 +32,26 @@ namespace EmpowerEligiblePatients
                 //client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
                 //client.BaseAddress = new Uri(ConfigurationManager.AppSettings["ClientBaseAddress"].ToString());
-                
-                
+
+
                 client.BaseAddress = new Uri("https://localhost:44328/api/");
-                Console.WriteLine("**** CLIENT URI = {0}",client.BaseAddress.ToString());
+                log.LogInformation("**** CLIENT URI = {0}", client.BaseAddress.ToString());
 
                 var postTask = client.PostAsJsonAsync<ProxyEligiblePatients>("EligiblePatients", eligiblePatients);
                 postTask.Wait();
                 var result = postTask.Result;
                 if (result.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("**** POSTED TO CLIENT SUCCESSFULLY ****");
+                    log.LogInformation("**** POSTED TO CLIENT SUCCESSFULLY ****");
+                    log.LogInformation("**** {0} ****", result.ToString());
                 }
                 else
                 {
-                    Console.WriteLine("**** ERROR: POST TO CLIENT FAILED!!****");
-                    Console.WriteLine("**** {0} ****", result.ToString());  
+                    log.LogInformation("**** ERROR: POST TO CLIENT FAILED!!****");
+                    log.LogInformation("**** {0} ****", result.ToString());
                 }
 
-            }
-
-
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri("https://localhost:44328/api/");
-            //    var postTask = client.PostAsJsonAsync("EligiblePatients", new StringContent(jsonObj, Encoding.UTF8, "application/json"));
-            //    postTask.Wait();
-
-            //    var result = postTask.Result;
-            //    if (result.IsSuccessStatusCode)
-            //    {
-
-            //    }
-            //}
+            }           
 
 
             //var student = "{'Id':'1','Name':'Steve'}";
@@ -87,7 +60,7 @@ namespace EmpowerEligiblePatients
             //var response = await client.PostAsync("api/values", new StringContent(student, Encoding.UTF8, "application/json"));
             //if (response != null)
             //{
-            //    Console.WriteLine(response.ToString());
+            //   log.LogInformation(response.ToString());
             //}
 
         }

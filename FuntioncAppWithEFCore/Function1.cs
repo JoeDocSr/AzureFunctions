@@ -64,7 +64,7 @@ namespace FuntioncAppWithEFCore
                 log.LogInformation("**** FOUND {0} ACTIVE DATA TAGS ****", listOfDataTagConfgs.Count.ToString());
 
                 log.LogInformation("**** PROCESSING PATIENTS AGAINST DATA TAGS ****.");
-                pd.ProcessPatients(listOfPatients, listOfDataTagConfgs, _empowerContext);
+                pd.ProcessPatients(listOfPatients, listOfDataTagConfgs, _empowerContext, log);
                 log.LogInformation("**** FINISHED PROCESSING PATIENTS AGAINST DATA TAGS ****");
             }
             else
