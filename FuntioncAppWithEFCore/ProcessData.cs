@@ -1,6 +1,7 @@
 ﻿using Empower.DataAccess.ApplicationContext.Empower;
 using Empower.DataAccess.Entities.Empower;
 using Empower.DataAccess.Entities.Eviti;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace EmpowerEligiblePatients
 
         private List<EligiblePatient> listOfEligiblePatients = new List<EligiblePatient>();
 
-        public void ProcessPatients(List<evitiEligiblePatients> listOfPatients, List<DataTag> lstOfDataTags, EmpowerContext _context)
+        public void ProcessPatients(List<evitiEligiblePatients> listOfPatients, List<DataTag> lstOfDataTags, EmpowerContext _context, ILogger log)
         {
             _empowerContext = _context;
             int outerCntr = 0;
@@ -37,7 +38,7 @@ namespace EmpowerEligiblePatients
                         {
                             if (dtag.RegimenGuids.Contains(evp.ReferenceGuid.ToString(), StringComparison.OrdinalIgnoreCase))
                             {
-                                AddThisEligiblePatient(evp, dtag.Id);
+                                AddThisEligiblePatient(evp, dtag.Id,log);
                                 //break;
                             }
                         }
@@ -151,7 +152,7 @@ namespace EmpowerEligiblePatients
 
                         if (matchToTag)
                         {
-                            AddThisEligiblePatient(evp, dtag.Id);
+                            AddThisEligiblePatient(evp, dtag.Id,log);
                             break;
                         }
 
@@ -161,20 +162,20 @@ namespace EmpowerEligiblePatients
 
             if (listOfEligiblePatients.Count > 0)
             {
-                Console.WriteLine("**** LIST OF ELIGIBLE PATIENTS TO SAVE = {0} ****",listOfEligiblePatients.Count());
+               log.LogInformation("**** LIST OF ELIGIBLE PATIENTS TO SAVE = {0} ****",listOfEligiblePatients.Count());
 
-                SaveEligiblePatients();
-                PrepareToPostToClient();
+                SaveEligiblePatients(log);
+                PrepareToPostToClient(log);
             }
             else
             {
-                Console.WriteLine("**** NO ELIGIBLE PATIENTS FOUND TO SAVE ****");
+               log.LogInformation("**** NO ELIGIBLE PATIENTS FOUND TO SAVE ****");
             }
             
 
         }
 
-        private void AddThisEligiblePatient(evitiEligiblePatients evp, long tagId)
+        private void AddThisEligiblePatient(evitiEligiblePatients evp, long tagId, ILogger log)
         {
             //Check to see if the patient was already add.
             //If so, update the list of data tags.
@@ -216,7 +217,7 @@ namespace EmpowerEligiblePatients
             }
         }
 
-        private void SaveEligiblePatients()
+        private void SaveEligiblePatients(ILogger log)
         {
             try
             {
@@ -232,7 +233,7 @@ namespace EmpowerEligiblePatients
 
         }
 
-        private void PrepareToPostToClient()
+        private void PrepareToPostToClient( ILogger log)
         {
             ProxyEligiblePatients listOfProyEligiblePatients = new ProxyEligiblePatients();
 
@@ -263,13 +264,13 @@ namespace EmpowerEligiblePatients
 
             }
 
-            SendDataToClient(listOfProyEligiblePatients);
+            SendDataToClient(listOfProyEligiblePatients,log);
         }
 
-        private void SendDataToClient(ProxyEligiblePatients pep)
+        private void SendDataToClient(ProxyEligiblePatients pep, ILogger log)
         {
             PostData postData = new();
-            postData.PostToClient(pep);
+            postData.PostToClient(pep, log);
         }
     }
 
